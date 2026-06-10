@@ -28,11 +28,11 @@
 
         <section id="top" class="hero__content">
           <div class="hero__copy">
-            <p class="eyebrow">Scan automatique • Zones éditables • Génération procédurale</p>
-            <h1>Transforme une texture UV Blockbench en matériaux propres.</h1>
+            <p class="eyebrow">Scan intelligent • Atlas 16x à 1024x • Matériaux PBR stylisés</p>
+            <h1>Transforme une texture UV Blockbench en atlas premium prêt à exporter.</h1>
             <p>
-              Dépose une texture exportée depuis Blockbench : le site repère les rectangles utiles,
-              te laisse choisir un matériau par zone, puis régénère une texture cohérente en bois ou en acier.
+              Dépose une texture exportée depuis Blockbench : l’app détecte les îlots UV, upscalle en 16×, 32×,
+              64×, 128× ou 256×, puis génère des matériaux détaillés avec bevel, grain, rayures, patine et glow.
             </p>
             <div class="hero__actions">
               <a class="button button--primary" href="#editor">Commencer</a>
@@ -46,7 +46,8 @@
               <span style="--x: 39%; --y: 11%; --w: 43%; --h: 9%; --m: steel"></span>
               <span style="--x: 38%; --y: 25%; --w: 48%; --h: 12%; --m: wood"></span>
               <span style="--x: 9%; --y: 66%; --w: 32%; --h: 9%; --m: steel"></span>
-              <span style="--x: 47%; --y: 60%; --w: 35%; --h: 8%; --m: wood"></span>
+              <span style="--x: 47%; --y: 60%; --w: 35%; --h: 8%; --m: emissive"></span>
+              <span style="--x: 58%; --y: 76%; --w: 22%; --h: 12%; --m: copper"></span>
             </div>
           </div>
         </section>
@@ -72,7 +73,7 @@
             <article>
               <span>03</span>
               <h3>Générer</h3>
-              <p>Applique du bois ou de l'acier, avec orientation automatique par rectangle.</p>
+              <p>Choisis bois, acier, pierre, cuivre ou cristal émissif, puis exporte dans la résolution voulue.</p>
             </article>
           </div>
         </section>
@@ -86,6 +87,7 @@
             <div class="editor__stats" role="status" aria-live="polite">
               <span id="imageInfo">Aucune image</span>
               <span id="zoneInfo">0 zone</span>
+              <span id="outputInfo">256 × 256px export</span>
             </div>
           </div>
 
@@ -112,12 +114,36 @@
               </div>
 
               <div class="control-group">
+                <h3>Résolution & qualité</h3>
+                <label>
+                  Résolution de sortie
+                  <select id="resolutionSelect" class="select-field">
+                    <option value="native">Native</option>
+                    <option value="16">16 × 16</option>
+                    <option value="32">32 × 32</option>
+                    <option value="64">64 × 64</option>
+                    <option value="128">128 × 128</option>
+                    <option value="256" selected>256 × 256</option>
+                    <option value="512">512 × 512</option>
+                    <option value="1024">1024 × 1024</option>
+                  </select>
+                </label>
+                <label>
+                  Détail procédural
+                  <input id="detailInput" type="range" min="1" max="4" value="3" />
+                </label>
+              </div>
+
+              <div class="control-group">
                 <h3>Matériau rapide</h3>
-                <div class="segmented" role="group" aria-label="Matériau global">
-                  <button type="button" data-apply-all="wood">Bois</button>
-                  <button type="button" data-apply-all="steel">Acier</button>
+                <div class="material-grid" role="group" aria-label="Matériau global">
+                  <button type="button" data-apply-all="wood" data-material-swatch="wood"><span data-material-name="wood">Bois</span></button>
+                  <button type="button" data-apply-all="steel" data-material-swatch="steel"><span data-material-name="steel">Acier</span></button>
+                  <button type="button" data-apply-all="stone" data-material-swatch="stone"><span data-material-name="stone">Pierre</span></button>
+                  <button type="button" data-apply-all="copper" data-material-swatch="copper"><span data-material-name="copper">Cuivre</span></button>
+                  <button type="button" data-apply-all="emissive" data-material-swatch="emissive"><span data-material-name="emissive">Émissif</span></button>
                 </div>
-                <button class="button button--primary button--full" id="generateButton" type="button">Générer la texture</button>
+                <button class="button button--primary button--full" id="generateButton" type="button">Générer HD</button>
                 <button class="button button--ghost button--full" id="downloadButton" type="button" disabled>Télécharger PNG</button>
               </div>
             </aside>
@@ -166,8 +192,11 @@
           <small></small>
         </div>
         <select aria-label="Matériau de la zone">
-          <option value="wood">Bois</option>
-          <option value="steel">Acier</option>
+          <option value="wood">Bois HD</option>
+          <option value="steel">Acier brossé</option>
+          <option value="stone">Pierre sculptée</option>
+          <option value="copper">Cuivre riveté</option>
+          <option value="emissive">Émissif cristal</option>
         </select>
       </article>
     </template>
