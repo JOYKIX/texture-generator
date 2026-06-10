@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Blockbench Texture Materializer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="assets/css/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="hero">
+        <nav class="topbar" aria-label="Navigation principale">
+          <a class="brand" href="#top" aria-label="Accueil">
+            <span class="brand__mark">BT</span>
+            <span>
+              <strong>Texture Materializer</strong>
+              <small>pour Blockbench</small>
+            </span>
+          </a>
+          <div class="topbar__links">
+            <a href="#workflow">Workflow</a>
+            <a href="#editor">Éditeur</a>
+          </div>
+        </nav>
+
+        <section id="top" class="hero__content">
+          <div class="hero__copy">
+            <p class="eyebrow">Scan automatique • Zones éditables • Génération procédurale</p>
+            <h1>Transforme une texture UV Blockbench en matériaux propres.</h1>
+            <p>
+              Dépose une texture exportée depuis Blockbench : le site repère les rectangles utiles,
+              te laisse choisir un matériau par zone, puis régénère une texture cohérente en bois ou en acier.
+            </p>
+            <div class="hero__actions">
+              <a class="button button--primary" href="#editor">Commencer</a>
+              <button class="button button--ghost" id="loadDemoButton" type="button">Charger une démo</button>
+            </div>
+          </div>
+          <div class="hero__card" aria-hidden="true">
+            <div class="mini-texture">
+              <span style="--x: 6%; --y: 7%; --w: 16%; --h: 54%; --m: wood"></span>
+              <span style="--x: 25%; --y: 7%; --w: 10%; --h: 54%; --m: wood"></span>
+              <span style="--x: 39%; --y: 11%; --w: 43%; --h: 9%; --m: steel"></span>
+              <span style="--x: 38%; --y: 25%; --w: 48%; --h: 12%; --m: wood"></span>
+              <span style="--x: 9%; --y: 66%; --w: 32%; --h: 9%; --m: steel"></span>
+              <span style="--x: 47%; --y: 60%; --w: 35%; --h: 8%; --m: wood"></span>
+            </div>
+          </div>
+        </section>
+      </header>
+
+      <main>
+        <section id="workflow" class="section workflow" aria-labelledby="workflow-title">
+          <div class="section__heading">
+            <p class="eyebrow">Pipeline clair</p>
+            <h2 id="workflow-title">Un flux pensé pour les textures en atlas.</h2>
+          </div>
+          <div class="steps">
+            <article>
+              <span>01</span>
+              <h3>Importer</h3>
+              <p>Charge un PNG/JPG/WebP. Les pixels transparents ou noirs sont ignorés.</p>
+            </article>
+            <article>
+              <span>02</span>
+              <h3>Scanner</h3>
+              <p>Les formes connectées sont fusionnées en rectangles UV manipulables.</p>
+            </article>
+            <article>
+              <span>03</span>
+              <h3>Générer</h3>
+              <p>Applique du bois ou de l'acier, avec orientation automatique par rectangle.</p>
+            </article>
+          </div>
+        </section>
+
+        <section id="editor" class="section editor" aria-labelledby="editor-title">
+          <div class="section__heading section__heading--split">
+            <div>
+              <p class="eyebrow">Éditeur</p>
+              <h2 id="editor-title">Dépose, corrige, exporte.</h2>
+            </div>
+            <div class="editor__stats" role="status" aria-live="polite">
+              <span id="imageInfo">Aucune image</span>
+              <span id="zoneInfo">0 zone</span>
+            </div>
+          </div>
+
+          <div class="editor-grid">
+            <aside class="panel controls" aria-label="Contrôles de génération">
+              <label class="dropzone" id="dropzone">
+                <input id="fileInput" type="file" accept="image/png,image/jpeg,image/webp" />
+                <span class="dropzone__icon">⬆</span>
+                <strong>Importer une texture</strong>
+                <small>PNG, JPG ou WebP — glisse-dépose accepté</small>
+              </label>
+
+              <div class="control-group">
+                <h3>Scan</h3>
+                <label>
+                  Tolérance fond noir
+                  <input id="thresholdInput" type="range" min="5" max="90" value="34" />
+                </label>
+                <label>
+                  Surface minimale
+                  <input id="minAreaInput" type="range" min="8" max="600" value="32" />
+                </label>
+                <button class="button button--secondary" id="rescanButton" type="button">Re-scanner</button>
+              </div>
+
+              <div class="control-group">
+                <h3>Matériau rapide</h3>
+                <div class="segmented" role="group" aria-label="Matériau global">
+                  <button type="button" data-apply-all="wood">Bois</button>
+                  <button type="button" data-apply-all="steel">Acier</button>
+                </div>
+                <button class="button button--primary button--full" id="generateButton" type="button">Générer la texture</button>
+                <button class="button button--ghost button--full" id="downloadButton" type="button" disabled>Télécharger PNG</button>
+              </div>
+            </aside>
+
+            <section class="workspace" aria-label="Prévisualisation de texture">
+              <div class="canvas-card">
+                <div class="canvas-toolbar">
+                  <span>Original + zones</span>
+                  <button id="toggleOverlayButton" type="button">Masquer zones</button>
+                </div>
+                <div class="canvas-wrap" id="canvasWrap">
+                  <canvas id="sourceCanvas" width="1024" height="1024"></canvas>
+                  <canvas id="overlayCanvas" width="1024" height="1024"></canvas>
+                </div>
+              </div>
+              <div class="canvas-card">
+                <div class="canvas-toolbar">
+                  <span>Résultat généré</span>
+                  <span class="pill" id="renderState">En attente</span>
+                </div>
+                <div class="canvas-wrap canvas-wrap--result">
+                  <canvas id="resultCanvas" width="1024" height="1024"></canvas>
+                </div>
+              </div>
+            </section>
+
+            <aside class="panel zones-panel" aria-label="Liste des zones détectées">
+              <div class="zones-panel__header">
+                <h3>Zones détectées</h3>
+                <small>Clique une ligne pour la surligner</small>
+              </div>
+              <div id="zonesList" class="zones-list">
+                <p class="empty-state">Importe une image pour détecter les rectangles.</p>
+              </div>
+            </aside>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="zoneTemplate">
+      <article class="zone-item">
+        <button class="zone-item__preview" type="button" aria-label="Sélectionner la zone"></button>
+        <div>
+          <strong></strong>
+          <small></small>
+        </div>
+        <select aria-label="Matériau de la zone">
+          <option value="wood">Bois</option>
+          <option value="steel">Acier</option>
+        </select>
+      </article>
+    </template>
+
+    <script type="module" src="assets/js/app.js"></script>
+  </body>
+</html>
